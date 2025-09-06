@@ -1,38 +1,66 @@
-import {reports} from "../data/reports.js"
+import { Report } from "../models/reportSchema.js";
 
 // Get all reports
-export const getReports = (req, res) => {
-  res.json(reports)
-}
-
-// Get single report
-export const getReportById = (req, res) => {
-  const report = reports.find(r => r.id === req.params.id)
-  if (!report) return res.status(404).json({ message: "Report not found" })
-  res.json(report)
-}
-
-// Create report
-export const createReport = (req, res) => {
-  const newReport = { id: `r${Date.now()}`, ...req.body }
-  reports.push(newReport)
-  res.status(201).json(newReport)
-}
-
-// Update report
-export const updateReport = (req, res) => {
-  const index = reports.findIndex(r => r.id === req.params.id)
-  if (index === -1) return res.status(404).json({ message: "Report not found" })
-  reports[index] = { ...reports[index], ...req.body }
-  res.json(reports[index])
-}
-
-// Delete report
-export const deleteReport = (req, res) => {
-  const index = reports.findIndex(p => p.id === req.params.id);
-  if (index === -1) return res.status(404).json({ message: "Report not found" });
-
-  const deleted = reports.splice(index, 1);
-  res.json(deleted[0]);
+export const getReports = async (req, res) => {
+  try {
+    const reports = await Report.find();
+    res.json(reports);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
+// Get single report
+export const getReportById = async (req, res) => {
+  try {
+    const report = await Report.findOne({ id: req.params.id });
+    if (!report) return res.status(404).json({ message: "Report not found" });
+    res.json(report);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Create report
+export const createReport = async (req, res) => {
+  try {
+    const { name, status, email, report } = req.body;
+    const newReport = new Report({
+      id: `r${Date.now()}`,
+      name,
+      status,
+      email,
+      report
+    });
+    await newReport.save();
+    res.status(201).json(newReport);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+// Update report
+export const updateReport = async (req, res) => {
+  try {
+    const report = await Report.findOneAndUpdate(
+      { id: req.params.id },
+      req.body,
+      { new: true, runValidators: true }
+    );
+    if (!report) return res.status(404).json({ message: "Report not found" });
+    res.json(report);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+// Delete report
+export const deleteReport = async (req, res) => {
+  try {
+    const report = await Report.findOneAndDelete({ id: req.params.id });
+    if (!report) return res.status(404).json({ message: "Report not found" });
+    res.json(report);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
