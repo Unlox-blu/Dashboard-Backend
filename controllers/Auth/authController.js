@@ -3,11 +3,11 @@ import { User } from "../../models/employee.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-import { gamilService } from "../../utils/services/gamil.js";
+import { gmailService, mockEmailService } from "../../utils/services/gmail.js";
 import generateOTP from "../../utils/generateOTP.js";
 
-const JWT_SECRET = process.env.JWT_SECRET; // access token secret
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET; // refresh token secret
+const JWT_SECRET = process.env.JWT_SECRET || "thiswouldbethesecret"; // access token secret
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || "thisakjsdasdb@bjjDeJp8Pm@un&akdhlox.e6lwevfad2025.4860f12b2f2dd22a4ee15e47fbc"; // refresh token secret
 
 function generatePassword() {
   const uppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -114,15 +114,24 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
+  console.log('Login attempt:', { email, password: '***' });
+  
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ org_email: email });
+    console.log('User found:', user ? { id: user._id, email: user.org_email, hasPassword: !!user.password } : 'No user found');
 
-    console.log({ user });
-
-    if (!user) return res.status(400).json({ message: "Email does not exist" });
+    if (!user) {
+      console.log('User not found with email:', email);
+      return res.status(400).json({ message: "Email does not exist" });
+    }
 
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(400).json({ message: "Incorrect password" });
+    console.log('Password match:', match);
+    
+    if (!match) {
+      console.log('Password mismatch for user:', email);
+      return res.status(400).json({ message: "Incorrect password" });
+    }
 
     const token = jwt.sign({ id: user._id }, "thiswouldbethesecret", {
       expiresIn: "1d",
@@ -223,7 +232,7 @@ export const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ org_email: email });
     if (!user) return res.status(404).json({ message: "User not found" });
 
     // const { token, hash } = generateResetToken();
@@ -237,7 +246,15 @@ export const forgotPassword = async (req, res) => {
 
     // const resetLink = `http://localhost:3000/reset-password/${token}`; // For frontend
 
-    await gamilService(
+    // Use mock email service for development (replace with gmailService when Gmail is properly configured)
+    await mockEmailService(
+      user.org_email,
+      "Your OTP for password reset",
+      `Your OTP is: ${otp}`
+    );
+    
+    // Uncomment below and comment above when Gmail App Password is configured:
+    await gmailService(
       user.org_email,
       "Your OTP for password reset",
       `Your OTP is: ${otp}`
@@ -312,6 +329,8 @@ export const getProfile = async (req, res) => {
     res.status(500).json({ message: "Error fetching user" });
   }
 };
+
+
 
 export default {
   register,
