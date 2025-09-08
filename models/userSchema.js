@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema(
     contact: { type: String, required: true },
     course: { type: String, required: true },
     batch: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now }
   },
   { collection: "blu_users" }
 );
