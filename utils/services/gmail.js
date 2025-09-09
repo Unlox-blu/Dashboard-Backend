@@ -7,7 +7,7 @@ export const gmailService = async (to, subject, text) => {
     throw new Error('Email service not configured');
   }
 
-  const transporter = nodemailer.createTransporter({
+  const transporter = nodemailer.createTransport({
     service: "Gmail",
     auth: {
       user: process.env.EMAIL_USER,
@@ -30,13 +30,13 @@ export const gmailService = async (to, subject, text) => {
   }
 };
 
-// Alternative: Mock email service for development
-export const mockEmailService = async (to, subject, text) => {
-  console.log('=== MOCK EMAIL SERVICE ===');
-  console.log(`To: ${to}`);
-  console.log(`Subject: ${subject}`);
-  console.log(`Content: ${text}`);
-  console.log('=========================');
-  return { messageId: 'mock-' + Date.now() };
-};
+// // Alternative: Mock email service for development
+// export const mockEmailService = async (to, subject, text) => {
+//   console.log('=== MOCK EMAIL SERVICE ===');
+//   console.log(`To: ${to}`);
+//   console.log(`Subject: ${subject}`);
+//   console.log(`Content: ${text}`);
+//   console.log('=========================');
+//   return { messageId: 'mock-' + Date.now() };
+// };
 

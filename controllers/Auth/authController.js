@@ -3,7 +3,7 @@ import { User } from "../../models/employee.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-import { gmailService, mockEmailService } from "../../utils/services/gmail.js";
+import { gmailService } from "../../utils/services/gmail.js";
 import generateOTP from "../../utils/generateOTP.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "thiswouldbethesecret"; // access token secret
@@ -247,11 +247,11 @@ export const forgotPassword = async (req, res) => {
     // const resetLink = `http://localhost:3000/reset-password/${token}`; // For frontend
 
     // Use mock email service for development (replace with gmailService when Gmail is properly configured)
-    await mockEmailService(
-      user.org_email,
-      "Your OTP for password reset",
-      `Your OTP is: ${otp}`
-    );
+    // await mockEmailService(
+    //   user.org_email,
+    //   "Your OTP for password reset",
+    //   `Your OTP is: ${otp}`
+    // );
     
     // Uncomment below and comment above when Gmail App Password is configured:
     await gmailService(
