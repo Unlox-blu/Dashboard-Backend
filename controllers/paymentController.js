@@ -1,3 +1,4 @@
+import { User } from "../models/employee.js";
 import { Payment } from "../models/paymentSchema.js";
 
 // GET all Payments
@@ -53,3 +54,21 @@ export const deletePerson = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+// Get all payments for logged-in employee's counselor_id
+export const getPaymentsByCounselor = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user || !user.counselor_id) {
+      return res.status(400).json({ message: "Counselor ID not found for this user" });
+    }
+
+    const payments = await Payment.find({ counselor_id: user.counselor_id }).sort({ createdAt: -1 });
+    res.status(200).json(payments);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+

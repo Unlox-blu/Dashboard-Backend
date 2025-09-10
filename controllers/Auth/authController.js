@@ -3,7 +3,7 @@ import { User } from "../../models/employee.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-import { gmailService } from "../../utils/services/gmail.js";
+import { gmailService, mockEmailService } from "../../utils/services/gmail.js";
 import generateOTP from "../../utils/generateOTP.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "thiswouldbethesecret"; // access token secret
@@ -115,7 +115,7 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   const { email, password } = req.body;
   console.log('Login attempt:', { email, password: '***' });
-  
+
   try {
     const user = await User.findOne({ org_email: email });
     console.log('User found:', user ? { id: user._id, email: user.org_email, hasPassword: !!user.password } : 'No user found');
@@ -127,15 +127,18 @@ export const login = async (req, res) => {
 
     const match = await bcrypt.compare(password, user.password);
     console.log('Password match:', match);
-    
+
     if (!match) {
       console.log('Password mismatch for user:', email);
       return res.status(400).json({ message: "Incorrect password" });
     }
 
-    const token = jwt.sign({ id: user._id }, "thiswouldbethesecret", {
-      expiresIn: "1d",
-    });
+    const token = jwt.sign(
+      { id: user._id, counselor_id: user.counselor_id }, // include counselor_id
+      JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
 
     const { accessToken, refreshToken } = generateTokens(user);
     console.log({ accessToken, refreshToken });
@@ -150,6 +153,8 @@ export const login = async (req, res) => {
         org_phone_number: user.org_phone_number,
         waiting: user.waiting,
         _id: user._id,
+        role: user.role,
+        counselor_id: user.counselor_id,
       },
     });
   } catch (err) {
@@ -247,12 +252,12 @@ export const forgotPassword = async (req, res) => {
     // const resetLink = `http://localhost:3000/reset-password/${token}`; // For frontend
 
     // Use mock email service for development (replace with gmailService when Gmail is properly configured)
-    // await mockEmailService(
-    //   user.org_email,
-    //   "Your OTP for password reset",
-    //   `Your OTP is: ${otp}`
-    // );
-    
+    await mockEmailService(
+      user.org_email,
+      "Your OTP for password reset",
+      `Your OTP is: ${otp}`
+    );
+
     // Uncomment below and comment above when Gmail App Password is configured:
     await gmailService(
       user.org_email,

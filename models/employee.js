@@ -24,6 +24,7 @@ const employeeSchema = new mongoose.Schema(
       default: generateShortUUID,
       unique: true,
     },
+    counselor_id: { type: String, required: true, unique: true },
     org_phone_number: { type: String, required: true }, // array of phone numbers // number recharge // recharge history
     personal_phone_number: { type: String, required: true },
     org_email: { type: String, required: true, unique: true },

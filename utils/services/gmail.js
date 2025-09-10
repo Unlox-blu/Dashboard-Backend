@@ -31,12 +31,12 @@ export const gmailService = async (to, subject, text) => {
 };
 
 // // Alternative: Mock email service for development
-// export const mockEmailService = async (to, subject, text) => {
-//   console.log('=== MOCK EMAIL SERVICE ===');
-//   console.log(`To: ${to}`);
-//   console.log(`Subject: ${subject}`);
-//   console.log(`Content: ${text}`);
-//   console.log('=========================');
-//   return { messageId: 'mock-' + Date.now() };
-// };
+export const mockEmailService = async (to, subject, text) => {
+  console.log('=== MOCK EMAIL SERVICE ===');
+  console.log(`To: ${to}`);
+  console.log(`Subject: ${subject}`);
+  console.log(`Content: ${text}`);
+  console.log('=========================');
+  return { messageId: 'mock-' + Date.now() };
+};
 
