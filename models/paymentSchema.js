@@ -6,7 +6,7 @@ const paymentSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true },
     phone_number: { type: String, required: true },
     course_name: { type: String, required: true },
-    course_type: { type: String, required: true },   // edge, etc.
+    course_type: { type: String, enum:["edge","edge+"], required: true },   // edge,edge+ 
     pay_option: { type: String, required: true },    // pre / full
     batch: { type: String, required: true },
     counselor_id: { type: String, required: true },

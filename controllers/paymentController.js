@@ -64,7 +64,7 @@ export const getPaymentsByCounselor = async (req, res) => {
       return res.status(400).json({ message: "Counselor ID not found for this user" });
     }
 
-    const payments = await Payment.find({ counselor_id: user.counselor_id }).sort({ createdAt: -1 });
+    const payments = await Payment.find({ counselor_id: user.counselor_id }).select(["-counselor_id","-batch",'-college','-department','-year','-city','-state','-order_id','-payment_id']).sort({ createdAt: -1 });
     res.status(200).json(payments);
   } catch (error) {
     console.error(error);
