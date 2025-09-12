@@ -13,10 +13,8 @@ export default function authMiddleware(req, res, next) {
   try {
     const decoded = jwt.verify(token, JWT_SECRET); // throws if expired or invalid
     
-    console.log("✅ Decoded Token:", decoded); // 👈 check what comes out
     req.user = decoded;
 
-    console.log("Session Exist");
     next();
   } catch (err) {
     console.error("❌ JWT Error:", err);
