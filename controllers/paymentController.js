@@ -1,6 +1,7 @@
 import { User } from "../models/employee.js";
 import { Payment } from "../models/paymentSchema.js";
 
+
 // GET all Payments
 export const getPeople = async (req, res) => {
   try {
@@ -63,7 +64,7 @@ export const getPaymentsByCounselor = async (req, res) => {
       return res.status(400).json({ message: "Counselor ID not found for this user" });
     }
 
-    const payments = await Payment.find({ counselor_id: user.counselor_id }).sort({ createdAt: -1 });
+    const payments = await Payment.find({ counselor_id: user.counselor_id }).select(["-counselor_id","-batch",'-college','-department','-year','-city','-state','-order_id','-payment_id']).sort({ createdAt: -1 });
     res.status(200).json(payments);
   } catch (error) {
     console.error(error);
@@ -72,3 +73,29 @@ export const getPaymentsByCounselor = async (req, res) => {
 };
 
 
+export const getTodaysPaymentsByCounselor = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user || !user.counselor_id) {
+      return res.status(400).json({ message: "Counselor ID not found for this user" });
+    }
+
+    const today = new Date();
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const todayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+
+    // Convert to timestamp strings for comparison
+    const todayStartStr = todayStart.toISOString();
+    const todayEndStr = todayEnd.toISOString();
+
+    const payments = await Payment.find({
+      counselor_id: user.counselor_id,
+      timestamp: { $gte: todayStartStr, $lt: todayEndStr },
+    }).sort({ timestamp: -1 });
+
+    res.json(payments);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
